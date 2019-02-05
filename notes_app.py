@@ -3,7 +3,6 @@ from flask import render_template
 from flask import request
 
 app = Flask(__name__)
-
 notes = []
 
 @app.route('/')
