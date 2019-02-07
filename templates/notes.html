@@ -1,4 +1,29 @@
 <HTML>
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script>
+            $(document).ready(function(){
+                //notes controls
+                $("hide_button").click(function(){
+                    $("#notes").hide();
+                    $("#hide_button").hide();
+                    $("#show_button").show();
+                });
+                $("show_button").click(function(){
+                    $("#notes").show();
+                    $("#show_button").hide();
+                    $("#hide_button").show();
+                });
+                $("#show_button").hide();
+                //fortune controls
+                $("show_fortune").click(function(){
+                    //$("fortune_cookie").text("Life is a...");
+                    $("fortune_cookie").load("/static/fortune.txt");
+                });
+
+            });
+        </script>
+    </head>
     <body>
         {% if message != None and message != "" %}
             {{message}}
@@ -10,9 +35,18 @@
             <br/>
             <input type="submit" value="Submit"/>
         </form>
-        {% for note in notes %}
-            {{note}}
-            <hr/>
-        {% endfor %}
+        <div id="notes">
+            {% for note in notes %}
+                {{note}}
+                <hr/>
+            {% endfor %}
+        </div>
+        <button id="hide_button">Hide Notes</button>
+        <button id="show_button">Show Notes</button>
+        <hr/>
+        <div id="fortune_cookie">Life...</div>
+        <button id="show_fortune">Show Fortune</button>
     </body>
 </HTML>
+
+
