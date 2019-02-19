@@ -1,24 +1,26 @@
 # notes
 import os
-import json
 #import pickle
+import json
+from tinydb import TinyDB, Query
+import re
 
-the_notes = []
+db = TinyDB("notes_tinydb.json")
 
 #get list of notes
-def get_notes():
-    global the_notes
-    if os.path.exists("notes.json"):
-        with open("notes.json","r") as f:
-            the_notes = json.load(f)
+def get_notes(search=None):
+    global db
+    query = Query()
+    if search:
+        the_notes = db.search(query.text.matches(".*"+search+".*", flags=re.IGNORECASE))
+    else:
+        the_notes = db.all()
+    the_notes = [n["text"] for n in the_notes]
     return the_notes
 
 #add note to the list
 def add_note(note):
-    global the_notes
-    if os.path.exists("notes.json"):
-        with open("notes.json","r") as f:
-            the_notes = json.load(f)
-    the_notes.append(note)
-    with open("notes.json","w") as f:
-        json.dump(the_notes, f)
+    global db
+    db.insert({"text": note})
+
+

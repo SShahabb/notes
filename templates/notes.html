@@ -2,25 +2,53 @@
     <head>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script>
-            $(document).ready(function(){
-                //notes controls
-                $("hide_button").click(function(){
-                    $("#notes").hide();
+            $(document).ready(function() {
+                //controls
+                $("#hide_button").click(function() {
+                    $("#content").hide();
                     $("#hide_button").hide();
                     $("#show_button").show();
                 });
-                $("show_button").click(function(){
-                    $("#notes").show();
+                $("#show_button").click(function(){
+                    $("#content").show();
                     $("#show_button").hide();
                     $("#hide_button").show();
                 });
                 $("#show_button").hide();
-                //fortune controls
-                $("show_fortune").click(function(){
-                    //$("fortune_cookie").text("Life is a...");
-                    $("fortune_cookie").load("/static/fortune.txt");
+                
+                //update controls
+                $("#update_button").click(function() {
+                    filter = $("#filter").val()
+                    $.get("/content/" + filter, function(data) {
+                        data = data["data"]
+                        output = "";
+                        for (i in data) {
+                            output += data[i] + "<hr/>";
+                        }
+                        $("#content").html(output);
+                    });
                 });
-
+                
+                $("#filter").keypress(function() {
+                    filter = $("#filter").val()
+                    $.get("/content/" + filter, function(data) {
+                        data = data["data"]
+                        output = "";
+                        for (i in data) {
+                            output += data[i] + "<hr/>";
+                        }
+                        $("#content").html(output);
+                    });
+                });
+                
+                $.get("/content/peaches", function(data) {
+                    data = data["data"]
+                    output = "";
+                    for (i in data) {
+                        output += data[i] + "<hr/>";
+                    }
+                    $("#content").html(output);
+                });
             });
         </script>
     </head>
@@ -35,18 +63,15 @@
             <br/>
             <input type="submit" value="Submit"/>
         </form>
-        <div id="notes">
-            {% for note in notes %}
-                {{note}}
-                <hr/>
-            {% endfor %}
-        </div>
+        <hr>
+        <input type="text" id="filter" name="filter" value=""/>
+        <hr>
+        <button id="update_button">Update Notes</button>
+        <hr>
         <button id="hide_button">Hide Notes</button>
         <button id="show_button">Show Notes</button>
-        <hr/>
-        <div id="fortune_cookie">Life...</div>
-        <button id="show_fortune">Show Fortune</button>
+        <hr>
+        <div id="content"></div>
+        <hr>
     </body>
 </HTML>
-
-
