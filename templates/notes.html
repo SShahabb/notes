@@ -1,77 +1,51 @@
 <HTML>
-    <head>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <script>
-            $(document).ready(function() {
-                //controls
-                $("#hide_button").click(function() {
-                    $("#content").hide();
-                    $("#hide_button").hide();
-                    $("#show_button").show();
-                });
-                $("#show_button").click(function(){
-                    $("#content").show();
-                    $("#show_button").hide();
-                    $("#hide_button").show();
-                });
-                $("#show_button").hide();
-                
-                //update controls
-                $("#update_button").click(function() {
-                    filter = $("#filter").val()
-                    $.get("/content/" + filter, function(data) {
-                        data = data["data"]
-                        output = "";
-                        for (i in data) {
-                            output += data[i] + "<hr/>";
-                        }
-                        $("#content").html(output);
-                    });
-                });
-                
-                $("#filter").keypress(function() {
-                    filter = $("#filter").val()
-                    $.get("/content/" + filter, function(data) {
-                        data = data["data"]
-                        output = "";
-                        for (i in data) {
-                            output += data[i] + "<hr/>";
-                        }
-                        $("#content").html(output);
-                    });
-                });
-                
-                $.get("/content/peaches", function(data) {
-                    data = data["data"]
-                    output = "";
-                    for (i in data) {
-                        output += data[i] + "<hr/>";
-                    }
-                    $("#content").html(output);
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+
+        function format_notes(data) {
+            function format_note(note_data) {
+                return "<tr><td>"+note_data+"</td><td>ABC</td></tr>";
+            }
+            notes_data = data["data"];
+            output = "<table>";
+            for (i in notes_data) {
+                output += format_note(notes_data[i]);
+            }
+            return output + "</table>";
+        }
+        $(document).ready(function() {
+            $("#filter_button").click(function() {
+                filter = $("#filter").val()
+                $.get("/content/" + filter, function(data) {
+                    $("#content").html(format_notes(data));
                 });
             });
-        </script>
-    </head>
-    <body>
-        {% if message != None and message != "" %}
-            {{message}}
-            <hr/>
-        {% endif %}
-        Notes
-        <form method="post" action="/notes">
-            <input type="text" name="note" value="abc"/>
-            <br/>
-            <input type="submit" value="Submit"/>
-        </form>
-        <hr>
-        <input type="text" id="filter" name="filter" value=""/>
-        <hr>
-        <button id="update_button">Update Notes</button>
-        <hr>
-        <button id="hide_button">Hide Notes</button>
-        <button id="show_button">Show Notes</button>
-        <hr>
-        <div id="content"></div>
-        <hr>
-    </body>
+            $.get("/content/", function(data) {
+                $("#content").html(format_notes(data));
+            });
+        });
+    </script>
+</head>
+<body>
+{% if message != None and message != "" %}
+    {{message}}
+    <hr/>
+{% endif %}
+Notes
+    <hr>
+    <input type="text" id="filter" name="filter" value=""/>
+    &nbsp;
+    <button id="filter_button">Filter</button>
+    <hr>
+    <div id="content"></div>
+    <form method="post" action="/notes">
+        <input type="text" name="note" value=""/>
+        &nbsp;
+        <input type="submit" value="Submit"/>
+    </form>
+    <hr>
+</body>
 </HTML>
+
+
