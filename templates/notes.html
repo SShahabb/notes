@@ -2,11 +2,24 @@
 <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script>
-        
+        function format_link(href,text) {
+            output = "<a href=\"" + href + "\">" + text + "</a>"
+            return output
+        }
+
+        function format_icon(href,icon) {
+            icon = "<img src=\"" + icon + "\" alt=\"ABC\" width=\"42\" height=\"42\" border=\"0\">";
+            output = "<a href=\"" + href + "\">" + icon + "</a>"
+            return output
+        }
 
         function format_notes(data) {
-            function format_note(note_data) {
-                return "<tr><td>"+note_data+"</td><td>ABC</td></tr>";
+            function format_note(n) {
+                id_cell = "<td>" + n.id + "</td>"
+                text_cell = "<td>" + n.text + "</td>"
+                //link_cell = "<td>" + format_link("/remove/" + n.id,"Remove") + "</td>"
+                link_cell = "<td>" + format_icon("/remove/" + n.id,"/static/delete.png") + "</td>"
+                return "<tr>" + text_cell + link_cell + "</tr>";
             }
             notes_data = data["data"];
             output = "<table>";

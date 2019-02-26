@@ -15,11 +15,21 @@ def get_notes(search=None):
         the_notes = db.search(query.text.matches(".*"+search+".*", flags=re.IGNORECASE))
     else:
         the_notes = db.all()
-    the_notes = [n["text"] for n in the_notes]
+    print(the_notes)
+    for n in the_notes:
+        n['id'] = n.doc_id
     return the_notes
 
 # add a note to the list of notes
 def add_note(note):
     global db
-    db.insert({"text":note})
+    id = db.insert({"text":note})
+    return id
 
+def delete_note(id):
+    global db
+    try:
+        db.remove(doc_ids = [id])
+    except KeyError:
+        pass
+        
