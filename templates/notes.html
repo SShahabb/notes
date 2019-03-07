@@ -2,6 +2,7 @@
 <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script>
+<<<<<<< HEAD
         function format_link(href,text) {
             output = "<a href=\"" + href + "\">" + text + "</a>"
             return output
@@ -20,6 +21,12 @@
                 //link_cell = "<td>" + format_link("/remove/" + n.id,"Remove") + "</td>"
                 link_cell = "<td>" + format_icon("/remove/" + n.id,"/static/delete.png") + "</td>"
                 return "<tr>" + text_cell + link_cell + "</tr>";
+=======
+
+        function format_notes(data) {
+            function format_note(note_data) {
+                return "<tr><td>"+note_data+"</td><td>ABC</td></tr>";
+>>>>>>> 5a2ae3df094fdae60520cc20fe4ff6f95c1e086f
             }
             notes_data = data["data"];
             output = "<table>";
@@ -28,16 +35,23 @@
             }
             return output + "</table>";
         }
+<<<<<<< HEAD
 
         $(document).ready(function() {
 
+=======
+        $(document).ready(function() {
+>>>>>>> 5a2ae3df094fdae60520cc20fe4ff6f95c1e086f
             $("#filter_button").click(function() {
                 filter = $("#filter").val()
                 $.get("/content/" + filter, function(data) {
                     $("#content").html(format_notes(data));
                 });
             });
+<<<<<<< HEAD
 
+=======
+>>>>>>> 5a2ae3df094fdae60520cc20fe4ff6f95c1e086f
             $.get("/content/", function(data) {
                 $("#content").html(format_notes(data));
             });
@@ -59,8 +73,17 @@ Notes
     <form method="post" action="/notes">
         <input type="text" name="note" value=""/>
         &nbsp;
+<<<<<<< HEAD
         <input type="submit" id="submit_button" value="Submit"/>
+=======
+        <input type="submit" value="Submit"/>
+>>>>>>> 5a2ae3df094fdae60520cc20fe4ff6f95c1e086f
     </form>
     <hr>
 </body>
 </HTML>
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 5a2ae3df094fdae60520cc20fe4ff6f95c1e086f

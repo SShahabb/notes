@@ -1,13 +1,12 @@
-# note
-
+# notes
 import os
 import json
-import re
 from tinydb import TinyDB, Query
+import re
 
 db = TinyDB("notes_tinydb.json")
 
-#get the list of notes
+#get list of notes
 def get_notes(search=None):
     global db
     query = Query()
