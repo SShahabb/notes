@@ -1,5 +1,1 @@
-<<<<<<< HEAD
-Life to you is a bold and dashing adventure!!
-=======
 Life to you is a bold and dashing adventure.
->>>>>>> 5a2ae3df094fdae60520cc20fe4ff6f95c1e086f
