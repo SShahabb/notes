@@ -61,11 +61,11 @@ Notes
         <table>
             <tr>
                 <td>User</td>
-                <td><input type="text" id="user_text" name="user" value="{{session['user']}}"/></td>
+                <td><input type="text" id="user_text" name="user" value="{{session.get('user','')}}"/></td>
             </tr>
             <tr>
                 <td>Email</td>
-                <td><input type="text" id="email_text" name="email" value="{{session['email']}}"/></td>
+                <td><input type="text" id="email_text" name="email" value="{{session.get('email','')}}"/></td>
             </tr>
             <tr>
                 <td>ZIP</td>

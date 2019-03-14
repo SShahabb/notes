@@ -10,6 +10,7 @@ from flask import redirect
 
 import json
 import random
+import os
 
 import notes_api
 
@@ -20,7 +21,14 @@ _message=""
 @app.route('/')
 @app.route('/notes', methods=['GET'])
 def get_notes():
-    session = json.loads(request.cookies.get("session"))
+    key = request.cookies.get("session_key","none")   
+    if os.path.exists(key + ".dat"):
+        with open(key + ".dat", "r") as f:
+            session = json.load(f)
+    else:
+        session = {
+
+        }
     response = make_response(render_template("notes.html", message=_message, session=session))
     return response
 
@@ -30,6 +38,7 @@ def post_notes():
     email = request.form.get("email")
     zip   = request.form.get("zip")
     note = request.form.get("note")
+    session_key = request.form.get("session_key")
     if note != None and note != "":
         notes_api.add_note(str(user + ": " + note))
     response =  make_response(redirect("/notes"))
@@ -38,20 +47,21 @@ def post_notes():
         "user": user,
         "email": email,
         "zip" : zip,
-        "key" : key
+        "key" : session_key
     }
-    response.set_cookie("session",json.dumps(session))
+    with open(key + ".dat", "w") as f:
+        json.dump(session,f)
+    response.set_cookie("session_key",key)
     return response
 
 @app.route('/logout', methods=['GET'])
 def get_logout():
-    session = json.loads(request.cookies.get("session"))
+    key = request.cookies.get("session_key")
     response =  make_response(redirect("/notes"))
-    session['user'] = ''
-    session['email'] = ''
-    session['zip'] = ''
-    session['key'] = ''
-    response.set_cookie("session",json.dumps(session))
+    session = {}
+    with open(key + ".dat", "w") as f:
+        json.dump(session,f)
+    response.set_cookie("session_key",key)
     return response
 
 # API ROUTES
