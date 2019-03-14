@@ -4,8 +4,12 @@
 from flask import Flask
 from flask import render_template
 from flask import request
+from flask import make_response
 from flask import jsonify
 from flask import redirect
+
+import json
+import random
 
 import notes_api
 
@@ -16,14 +20,41 @@ _message=""
 @app.route('/')
 @app.route('/notes', methods=['GET'])
 def get_notes():
-    return render_template("notes.html", message=_message)
+    session = json.loads(request.cookies.get("session"))
+    response = make_response(render_template("notes.html", message=_message, session=session))
+    return response
 
 @app.route('/notes', methods=['POST'])
 def post_notes():
+    user = request.form.get("user")
+    email = request.form.get("email")
+    zip   = request.form.get("zip")
     note = request.form.get("note")
     if note != None and note != "":
-        notes_api.add_note(str(note))
-    return redirect("/notes")
+        notes_api.add_note(str(user + ": " + note))
+    response =  make_response(redirect("/notes"))
+    key = str(random.randint(1000000000,1999999999))
+    session = {
+        "user": user,
+        "email": email,
+        "zip" : zip,
+        "key" : key
+    }
+    response.set_cookie("session",json.dumps(session))
+    return response
+
+@app.route('/logout', methods=['GET'])
+def get_logout():
+    session = json.loads(request.cookies.get("session"))
+    response =  make_response(redirect("/notes"))
+    session['user'] = ''
+    session['email'] = ''
+    session['zip'] = ''
+    session['key'] = ''
+    response.set_cookie("session",json.dumps(session))
+    return response
+
+# API ROUTES
 
 @app.route("/content/")
 @app.route("/content/<search>")
