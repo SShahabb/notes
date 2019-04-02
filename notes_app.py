@@ -11,8 +11,9 @@ from flask import redirect
 import json
 import random
 import os
+import time
 
-import data_api
+import storage
 
 app = Flask(__name__)
 
@@ -28,15 +29,17 @@ def get_register():
 @app.route('/register', methods=['POST'])
 def post_register():
     global _message
-    data_api.add_profile({
+    # save the registration to the profile database
+    storage.add_profile({
         'user':request.form.get("user"),
         'email':request.form.get("email"),
-        'password':request.form.get("password")
+        'password':request.form.get("password")     # <-- HORRIBLE
     })
-    # save the registration to the profile database
     # if we are successful
+    # -- PUT A CHECK HERE --
     if True:
         response =  make_response(redirect("/login"))
+        _message = None
     else:
     # else if we are not successful
         response =  make_response(redirect("/register"))
@@ -56,60 +59,92 @@ def post_login():
     global _message
     user = request.form.get("user")
     password = request.form.get("password")
-    profiles = data_api.get_profiles(user)
-    if len(profiles) > 0:
-        if profiles[0]['password'] == password:
-            response =  make_response(redirect("/notes"))
-            return response
+    profile = storage.get_profile(user)
+    # create a rejection response
     response =  make_response(redirect("/login"))
-    _message = "User/password not found, please try again."
+    response.set_cookie("session_key", "", expires=0)
+    if not profile:
+        _message = "User/password not found, please try again."
+        return response
+    if profile['password'] != password:
+        # NEED TO HANDLE PASSWORDS CORRECTLY
+        _message = "User/password not found, please try again."
+        return response
+    # create a success response
+    response =  make_response(redirect("/notes"))
+    # generate a (not really) random string 
+    key = "session." + str(random.randint(1000000000,1999999999))
+    # create a session based on that key
+    storage.add_session({"key":key, "user":user, "login":int(time.time()), "pages":1})
+    # store the key in a cookie
+    response.set_cookie("session_key", key, max_age=600)
+    _message = None
     return response
 
 @app.route('/notes', methods=['GET'])
 def get_notes():
     global _message
-    key = request.cookies.get("session_key","none")   
-    if os.path.exists(key + ".dat"):
-        with open(key + ".dat", "r") as f:
-            session = json.load(f)
-    else:
-        session = {
-
-        }
-    response = make_response(render_template("notes.html", message=_message, session=session))
+    key = request.cookies.get("session_key")
+    # create a rejection response
+    response =  make_response(redirect("/login"))
+    response.set_cookie("session_key", "", expires=0)
+    if not key:
+        _message = "User is not logged in."
+        return response
+    session = storage.get_session(key)
+    if not session:
+        _message = "User is not logged in."
+        return response
     _message = None
+    pages = session.get("pages",-999)
+    pages=pages+1
+    session["pages"] = pages
+    storage.update_session(key, {"pages":pages})
+    response = make_response(render_template("notes.html", message=_message, session=session))
+    response.set_cookie("session_key", key, max_age=600)
     return response
 
 @app.route('/notes', methods=['POST'])
 def post_notes():
+    key = request.cookies.get("session_key")
+    # create a rejection response
+    response =  make_response(redirect("/login"))
+    response.set_cookie("session_key", "", expires=0)
+    _message = "User is not logged in."
+    if not key:
+        return response
+    session = storage.get_session(key)
+    if not session:
+        return response
+    # OK, we are logged in so process the form submission
     user = request.form.get("user")
     email = request.form.get("email")
     zip   = request.form.get("zip")
     note = request.form.get("note")
-    session_key = request.form.get("session_key")
     if note != None and note != "":
-        data_api.add_note(str(user + ": " + note))
+        storage.add_note({'text': str(user + ": " + note)})
     response =  make_response(redirect("/notes"))
-    key = str(random.randint(1000000000,1999999999))
-    session = {
-        "user": user,
-        "email": email,
-        "zip" : zip,
-        "key" : session_key
-    }
-    with open(key + ".dat", "w") as f:
-        json.dump(session,f)
-    response.set_cookie("session_key",key)
+    response.set_cookie("session_key", key, max_age=600)
+    _message = None
     return response
 
 @app.route('/logout', methods=['GET'])
 def get_logout():
     key = request.cookies.get("session_key")
-    response =  make_response(redirect("/notes"))
-    session = {}
-    with open(key + ".dat", "w") as f:
-        json.dump(session,f)
-    response.set_cookie("session_key",key)
+    # create a rejection response
+    response =  make_response(redirect("/login"))
+    response.set_cookie("session_key", "", expires=0)
+    _message = "User is not logged in."
+    if not key:
+        return response
+    session = storage.get_session(key)
+    if not session:
+        return response
+    if key:
+        storage.delete_session(key)
+    response =  make_response(redirect("/login"))
+    response.set_cookie("session_key", "", expires=0)
+    _message = None
     return response
 
 # API ROUTES
@@ -117,11 +152,11 @@ def get_logout():
 @app.route("/content/")
 @app.route("/content/<search>")
 def get_content(search=None):
-    items = data_api.get_notes(search)
+    items = storage.get_notes(search)
     data = { "data": items }
     return jsonify(data)
 
 @app.route("/remove/<int:id>")
 def get_remove(id):
-    data_api.delete_note(id)
+    storage.delete_note(id)
     return redirect("/notes")
