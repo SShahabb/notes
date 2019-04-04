@@ -12,12 +12,16 @@ import json
 import random
 import os
 import time
+import hashlib
 
 import storage
 
 app = Flask(__name__)
 
 _message=""
+
+def encrypt(password, salt):
+    return hashlib.sha256((password+salt).encode()).hexdigest()
 
 @app.route('/register', methods=['GET'])
 def get_register():
@@ -29,11 +33,13 @@ def get_register():
 @app.route('/register', methods=['POST'])
 def post_register():
     global _message
+    salt = str(time.time())[3:]
     # save the registration to the profile database
     storage.add_profile({
         'user':request.form.get("user"),
         'email':request.form.get("email"),
-        'password':request.form.get("password")     # <-- HORRIBLE
+        'salt':salt,
+        'password':encrypt(request.form.get("password"), salt)
     })
     # if we are successful
     # -- PUT A CHECK HERE --
@@ -66,7 +72,7 @@ def post_login():
     if not profile:
         _message = "User/password not found, please try again."
         return response
-    if profile['password'] != password:
+    if profile['password'] != encrypt(password, profile['salt']):
         # NEED TO HANDLE PASSWORDS CORRECTLY
         _message = "User/password not found, please try again."
         return response
@@ -95,13 +101,10 @@ def get_notes():
     if not session:
         _message = "User is not logged in."
         return response
-    _message = None
-    pages = session.get("pages",-999)
-    pages=pages+1
-    session["pages"] = pages
-    storage.update_session(key, {"pages":pages})
     response = make_response(render_template("notes.html", message=_message, session=session))
+    storage.update_session(key, {"pages":(session.get("pages",0) + 1)})
     response.set_cookie("session_key", key, max_age=600)
+    _message = None
     return response
 
 @app.route('/notes', methods=['POST'])
