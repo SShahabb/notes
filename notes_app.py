@@ -1,5 +1,8 @@
-
-# A very simple Flask Hello World app for you to get started with...
+import json
+import random
+import os
+import time
+import hashlib
 
 from flask import Flask
 from flask import render_template
@@ -7,12 +10,6 @@ from flask import request
 from flask import make_response
 from flask import jsonify
 from flask import redirect
-
-import json
-import random
-import os
-import time
-import hashlib
 
 import storage
 
@@ -25,14 +22,13 @@ def encrypt(password, salt):
 
 @app.route('/register', methods=['GET'])
 def get_register():
-    global _message
-    response = make_response(render_template("register.html", message=_message))
-    _message = None
+    message = request.cookies.get("message")
+    response = make_response(render_template("register.html", message=message, session=None))
+    response.set_cookie("message","",expires=0)
     return response
 
 @app.route('/register', methods=['POST'])
 def post_register():
-    global _message
     salt = str(time.time())[3:]
     # save the registration to the profile database
     storage.add_profile({
@@ -45,24 +41,23 @@ def post_register():
     # -- PUT A CHECK HERE --
     if True:
         response =  make_response(redirect("/login"))
-        _message = None
+        response.set_cookie("message","",expires=0)
     else:
     # else if we are not successful
         response =  make_response(redirect("/register"))
-        _message = "Error in registration, please try again."
+        response.set_cookie("message","Error in registration, please try again.")
     return response
 
 @app.route('/')
 @app.route('/login', methods=['GET'])
 def get_login():
-    global _message
-    response = make_response(render_template("login.html", message=_message))
-    _message = None
+    message = request.cookies.get("message")
+    response = make_response(render_template("login.html", message=message, session=None))
+    response.set_cookie("message","",expires=0)
     return response
 
 @app.route('/login', methods=['POST'])
 def post_login():
-    global _message
     user = request.form.get("user")
     password = request.form.get("password")
     profile = storage.get_profile(user)
@@ -70,11 +65,11 @@ def post_login():
     response =  make_response(redirect("/login"))
     response.set_cookie("session_key", "", expires=0)
     if not profile:
-        _message = "User/password not found, please try again."
+        response.set_cookie("message","User/password not found, please try again.")
         return response
     if profile['password'] != encrypt(password, profile['salt']):
         # NEED TO HANDLE PASSWORDS CORRECTLY
-        _message = "User/password not found, please try again."
+        response.set_cookie("message","User/password not found, please try again.")
         return response
     # create a success response
     response =  make_response(redirect("/notes"))
@@ -84,27 +79,26 @@ def post_login():
     storage.add_session({"key":key, "user":user, "login":int(time.time()), "pages":1})
     # store the key in a cookie
     response.set_cookie("session_key", key, max_age=600)
-    _message = None
     return response
 
 @app.route('/notes', methods=['GET'])
 def get_notes():
-    global _message
+    message = request.cookies.get("message")
     key = request.cookies.get("session_key")
     # create a rejection response
     response =  make_response(redirect("/login"))
     response.set_cookie("session_key", "", expires=0)
     if not key:
-        _message = "User is not logged in."
+        response.set_cookie("message","User is not logged in.")
         return response
     session = storage.get_session(key)
     if not session:
-        _message = "User is not logged in."
+        response.set_cookie("message","User is not logged in.")
         return response
-    response = make_response(render_template("notes.html", message=_message, session=session))
+    response = make_response(render_template("notes.html", message=message, session=session))
     storage.update_session(key, {"pages":(session.get("pages",0) + 1)})
     response.set_cookie("session_key", key, max_age=600)
-    _message = None
+    response.set_cookie("message","",expires=0)
     return response
 
 @app.route('/notes', methods=['POST'])
@@ -113,11 +107,12 @@ def post_notes():
     # create a rejection response
     response =  make_response(redirect("/login"))
     response.set_cookie("session_key", "", expires=0)
-    _message = "User is not logged in."
     if not key:
+        response.set_cookie("message","User is not logged in.")
         return response
     session = storage.get_session(key)
     if not session:
+        response.set_cookie("message","User is not logged in.")
         return response
     # OK, we are logged in so process the form submission
     user = request.form.get("user")
@@ -128,7 +123,7 @@ def post_notes():
         storage.add_note({'text': str(user + ": " + note)})
     response =  make_response(redirect("/notes"))
     response.set_cookie("session_key", key, max_age=600)
-    _message = None
+    response.set_cookie("message","",expires=0)
     return response
 
 @app.route('/logout', methods=['GET'])
@@ -137,17 +132,18 @@ def get_logout():
     # create a rejection response
     response =  make_response(redirect("/login"))
     response.set_cookie("session_key", "", expires=0)
-    _message = "User is not logged in."
     if not key:
+        response.set_cookie("message","User is not logged in.")
         return response
     session = storage.get_session(key)
     if not session:
+        response.set_cookie("message","User is not logged in.")
         return response
     if key:
         storage.delete_session(key)
     response =  make_response(redirect("/login"))
     response.set_cookie("session_key", "", expires=0)
-    _message = None
+    response.set_cookie("message","",expires=0)
     return response
 
 # API ROUTES
