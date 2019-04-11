@@ -12,34 +12,35 @@
             output = "<a href=\"" + href + "\">" + icon + "</a>"
             return output
         }
-    
-        function format_notes(data) {
-            function format_note(n) {
-                id_cell = "<td>" + n.id + "</td>"
-                text_cell = "<td>" + n.text + "</td>"
-                //link_cell = "<td>" + format_link("/remove/" + n.id,"Remove") + "</td>"
-                link_cell = "<td>" + format_icon("/remove/" + n.id,"/static/delete.png") + "</td>"
-                return "<tr>" + text_cell + link_cell + "</tr>";
+        
+        function format_note_cards(data) {
+            function format_note_card(n) {
+                delete_link = format_icon("/remove/" + n.id,"/static/delete.png")
+                card = `
+                  <div class="card">
+                    <div class="card-body">` + n.text + `&nbsp` + delete_link + ` </div>
+                  </div>`
+                return card;
             }
             notes_data = data["data"];
-            output = '<table class="table table-bordered">';
+            output = '<div class="container">'
             for (i in notes_data) {
-                output += format_note(notes_data[i]);
+                output += format_note_card(notes_data[i]);
             }
-            return output + "</table>";
+            return output + "</div>";
         }
-    
+
         $(document).ready(function() {
     
             $("#filter_button").click(function() {
                 filter = $("#filter").val()
                 $.get("/content/" + filter, function(data) {
-                    $("#content").html(format_notes(data));
+                    $("#content").html(format_note_cards(data));
                 });
             });
     
             $.get("/content/", function(data) {
-                $("#content").html(format_notes(data));
+                $("#content").html(format_note_cards(data));
             });
         });
     </script>
