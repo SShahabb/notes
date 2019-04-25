@@ -1,23 +1,15 @@
 {% extends "base.html" %}
 {% block body %}
-<h3>Login</h3>
-<hr/>
-<form method="post" action="/login">
-        <table>
-            <tr>
-                <td>User</td>
-                <td><input type="text" id="user_text" name="user" value=""/></td>
-            </tr>
-            <tr>
-                <td>Password</td>
-                <td><input type="text" id="password_text" name="password" value=""/></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td style="float:right"><input type="submit" id="submit_button" value="Submit"/></td>
-            </tr>
-        </table>
+<link href="/static/login.css" rel="stylesheet">
+<div class="wrapper">
+    <form class="form-signin" method="post" action="/login">       
+        <h2 class="form-signin-heading">Please login</h2>
+        <input type="text" class="form-control" name="user" id="user_text" placeholder="Username" required="" autofocus="" />
+        <input type="password" class="form-control" name="password" id="password_text" placeholder="Password" required=""/>      
+        <br>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Login</button>   
+        <br>
+        <a href="/register">Need an account?</a>
     </form>
-    <hr/>
-    <a href="/register">Need an account?</a>
+</div>
 {% endblock %}
