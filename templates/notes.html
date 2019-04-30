@@ -1,78 +1,59 @@
-<HTML>
-<head>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script>
+{% extends "base.html" %}
+<title>Bootstrap Example</title>
+{% block head %}
+<script>
         function format_link(href,text) {
             output = "<a href=\"" + href + "\">" + text + "</a>"
             return output
         }
-
+    
         function format_icon(href,icon) {
             icon = "<img src=\"" + icon + "\" alt=\"ABC\" width=\"42\" height=\"42\" border=\"0\">";
             output = "<a href=\"" + href + "\">" + icon + "</a>"
             return output
         }
-
-        function format_notes(data) {
-            function format_note(n) {
-                id_cell = "<td>" + n.id + "</td>"
-                text_cell = "<td>" + n.text + "</td>"
-                //link_cell = "<td>" + format_link("/remove/" + n.id,"Remove") + "</td>"
-                link_cell = "<td>" + format_icon("/remove/" + n.id,"/static/delete.png") + "</td>"
-                return "<tr>" + text_cell + link_cell + "</tr>";
+        
+        function format_note_cards(data) {
+            function format_note_card(n) {
+                delete_link = '<div class="float-right">' + format_icon("/remove/" + n.id,"/static/delete.png") + "</div>"
+                card = `
+                  <div class="card">
+                    <div class="card-body">` + n.text + `&nbsp` + delete_link + ` </div>
+                  </div>`
+                return card;
             }
             notes_data = data["data"];
-            output = "<table>";
+            output = '<div class="container">'
             for (i in notes_data) {
-                output += format_note(notes_data[i]);
+                output += format_note_card(notes_data[i]);
             }
-            return output + "</table>";
+            return output + "</div>";
         }
 
         $(document).ready(function() {
-
-            $("#filter_button").click(function() {
-                filter = $("#filter").val()
+    
+            $("#search_button").click(function() {
+                filter = $("#search_text").val()
                 $.get("/content/" + filter, function(data) {
-                    $("#content").html(format_notes(data));
+                    $("#content").html(format_note_cards(data));
                 });
             });
+    
             $.get("/content/", function(data) {
-                $("#content").html(format_notes(data));
+                $("#content").html(format_note_cards(data));
             });
         });
     </script>
-</head>
-<body>
-{% if message != None and message != "" %}
-    {{message}}
-    <hr/>
-{% endif %}
-Notes
-    <hr>
-    <input type="text" id="filter" name="filter" value=""/>
-    &nbsp;
-    <button id="filter_button">Filter</button>
-    <hr>
+{% endblock %}
+{% block body %}
+<h3>Notes</h3>
     <div id="content"></div>
     <hr>
     <form method="post" action="/notes">
-        <table>
+        <table class="table table-bordered">
             <tr>
                 <td>User</td>
                 <td><input type="text" id="user_text" name="user" value="{{session.get('user','')}}"/></td>
-            </tr>
-            <tr>
-                <td>Email</td>
-                <td><input type="text" id="email_text" name="email" value="{{session.get('email','')}}"/></td>
-            </tr>
-            <tr>
-                <td>ZIP</td>
-                <td><input type="text" id="zip_text" name="zip" value="{{session.get('zip','44240')}}"/></td>
-            </tr>
-            <tr>
-                <td>KEY</td>
-                <td><input type="text" id="key_text" name="key" value="{{session.get('key',0)}}"/></td>
             </tr>
             <tr>
                 <td>Note</td>
@@ -85,5 +66,5 @@ Notes
         </table>
     </form>
     <hr>
-</body>
-</HTML>
+
+{% endblock %}

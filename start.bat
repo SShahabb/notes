@@ -1,3 +1,3 @@
 set FLASK_DEBUG=True
-set FLASK_APP=notes_app.py
+set FLASK_APP=main.py
 flask run
