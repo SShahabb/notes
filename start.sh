@@ -1,3 +1,3 @@
 export FLASK_DEBUG=True
-export FLASK_APP=notes_app.py
+export FLASK_APP=main.py
 flask run

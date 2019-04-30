@@ -15,7 +15,10 @@ import storage
 
 app = Flask(__name__)
 
-_message=""
+# _message=""
+
+def random_string(n):
+    return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for i in range(n))
 
 def encrypt(password, salt):
     return hashlib.sha256((password+salt).encode()).hexdigest()
