@@ -22,7 +22,12 @@ def get_profile(user):
     profile = profile_table.get(where('user') == user)
     if profile:
         return dict(profile)
-    return None
+    # TODO: GENERATE NEW PROFILE
+    return { "user": user, "email":"", "zipcode":"" }
+
+def update_profile(user, updates):
+    assert type(updates) is dict
+    profile_table.update(updates, where('user') == user)
 
 def delete_profile(user):
     profile_table.remove(where('user') == user)

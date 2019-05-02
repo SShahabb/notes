@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block body %}
+<link href="/static/profile.css" rel="stylesheet">
+<div class="wrapper">
+    <form method="post" class="container" action="/profile">
+        <h2 class="form-signin-heading">Tell us about yourself.</h2>
+        User name<br>
+        <input type="text" class="form-control" name="user" id="user_input" value="{{profile.user}}" disabled required=""  />
+        <br>
+        Email<br>
+        <input type="text" class="form-control" name="email" id="email_input" value="{{profile.email}}" required="" autofocus="" />
+        <br>
+        Zip Code<br>
+        <input type="text" class="form-control" name="zipcode" id="zipcode_input" value="{{profile.zipcode}}" required="" />
+        <br>
+        <input type="submit" style="float:right" id="submit_button" value="Save Profile"/>
+    </form>
+</div>
+</br>
+<img src="https://maps.googleapis.com/maps/api/staticmap?center={{profile.zipcode}}&zoom=12&size=400x400&key=AIzaSyDCZsCMVqmU_NSehibK-mlRXjWuXHajvng"/>
+{% endblock %}
