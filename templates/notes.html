@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-<title>Bootstrap Example</title>
+<title>Notes</title>
 {% block head %}
 <script>
         function format_link(href,text) {
@@ -18,14 +18,16 @@
                 delete_link = '<div class="float-right">' + format_icon("/remove/" + n.id,"/static/delete.png") + "</div>"
                 card = `
                   <div class="card">
-                    <div class="card-body">` + n.text + `&nbsp` + delete_link + ` </div>
+                    <div class="card-header">` + "4/25/2019 6:14PM" + `</div>
+                    <div class="card-body">`   + n.text + `</div>
+                    <div class="card-footer">` + delete_link + `</div>
                   </div>`
                 return card;
             }
             notes_data = data["data"];
             output = '<div class="container">'
             for (i in notes_data) {
-                output += format_note_card(notes_data[i]);
+                output += format_note_card(notes_data[i]) + "<br>";
             }
             return output + "</div>";
         }
@@ -46,25 +48,18 @@
     </script>
 {% endblock %}
 {% block body %}
-<h3>Notes</h3>
+    <br>
     <div id="content"></div>
-    <hr>
-    <form method="post" action="/notes">
-        <table class="table table-bordered">
-            <tr>
-                <td>User</td>
-                <td><input type="text" id="user_text" name="user" value="{{session.get('user','')}}"/></td>
-            </tr>
-            <tr>
-                <td>Note</td>
-                <td><input type="text" id="note_text" name="note" value=""/></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td style="float:right"><input type="submit" id="submit_button" value="Submit"/></td>
-            </tr>
-        </table>
+    <form method="post" class="container" action="/notes">
+        <div class="card">
+            <div class="card-header bg-grey"><em>New Note<em></div>
+            <div class="card-body">
+                <input style="width:100%" type="text" id="note_text" name="note" value=""/>
+                <hr>
+                <input type="submit" style="float:right" id="submit_button" value="Save Note"/>
+                <br>
+            </div>
+        </div>`
     </form>
-    <hr>
-
 {% endblock %}
+
